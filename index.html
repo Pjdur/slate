@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Word Processor</title>
+    <style>
+        /* --- Root & Layout Styling --- */
+        :root {
+            --primary-color: #2b579a; /* MS Word Blue */
+            --bg-color: #e6e6e6;
+            --toolbar-bg: #f3f3f3;
+            --border-color: #d1d1d1;
+            --button-hover: #d0e1f9;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Header & Toolbar --- */
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .toolbar {
+            background-color: var(--toolbar-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 6px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            border-right: 1px solid var(--border-color);
+            padding-right: 6px;
+            margin-right: 2px;
+        }
+
+        .tool-group:last-child {
+            border-right: none;
+        }
+
+        /* --- Toolbar Controls --- */
+        button, select, input[type="color"] {
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            padding: 5px 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px;
+            color: var(--text-color);
+            transition: all 0.2s ease;
+        }
+
+        button:hover, select:hover {
+            background-color: var(--button-hover);
+            border-color: #a6c8e0;
+        }
+
+        button:active {
+            background-color: #b5d3ed;
+        }
+
+        select {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            outline: none;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            padding: 0 4px;
+        }
+
+        input[type="color"] {
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+        }
+
+        /* --- Document Workspace --- */
+        .workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 10px;
+            display: flex;
+            justify-content: center;
+            background-color: var(--bg-color);
+        }
+
+        /* Paper Style (Standard A4 ratio representation) */
+        #editor {
+            background-color: #ffffff;
+            width: 816px; /* Standard Letter/A4 pixel width equivalent */
+            min-height: 1056px;
+            padding: 72px; /* 1 inch margin */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            outline: none;
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #000000;
+            word-wrap: break-word;
+        }
+
+        #editor:focus {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        /* --- Status Bar --- */
+        .status-bar {
+            background-color: #f9f9f9;
+            border-top: 1px solid var(--border-color);
+            padding: 4px 20px;
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body {
+                background: white;
+            }
+            header, .toolbar, .status-bar {
+                display: none !important;
+            }
+            .workspace {
+                padding: 0;
+                overflow: visible;
+            }
+            #editor {
+                box-shadow: none;
+                width: 100%;
+                min-height: auto;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Title -->
+    <header>
+        <h1>Web Word Processor</h1>
+        <span style="font-size: 0.8rem; opacity: 0.8;">Single-File Rich Text Editor</span>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <!-- History -->
+        <div class="tool-group">
+            <button onclick="formatDoc('undo')" title="Undo">↩ Undo</button>
+            <button onclick="formatDoc('redo')" title="Redo">↪ Redo</button>
+        </div>
+
+        <!-- Typography -->
+        <div class="tool-group">
+            <select onchange="formatDoc('fontName', this.value)" title="Font Family">
+                <option value="Arial" selected>Arial</option>
+                <option value="Calibri">Calibri</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Verdana">Verdana</option>
+            </select>
+
+            <select onchange="formatDoc('fontSize', this.value)" title="Font Size">
+                <option value="1">Small</option>
+                <option value="3" selected>Normal</option>
+                <option value="4">Large</option>
+                <option value="5">Huge</option>
+                <option value="6">Maximum</option>
+            </select>
+
+            <select onchange="formatDoc('formatBlock', this.value)" title="Style Header">
+                <option value="P">Paragraph</option>
+                <option value="H1">Heading 1</option>
+                <option value="H2">Heading 2</option>
+                <option value="H3">Heading 3</option>
+            </select>
+        </div>
+
+        <!-- Inline Formatting -->
+        <div class="tool-group">
+            <button onclick="formatDoc('bold')" title="Bold"><b>B</b></button>
+            <button onclick="formatDoc('italic')" title="Italic"><i>I</i></button>
+            <button onclick="formatDoc('underline')" title="Underline"><u>U</u></button>
+            <button onclick="formatDoc('strikeThrough')" title="Strikethrough"><s>S</s></button>
+        </div>
+
+        <!-- Colors -->
+        <div class="tool-group">
+            <div class="color-picker-wrapper" title="Text Color">
+                <span>Text</span>
+                <input type="color" onchange="formatDoc('foreColor', this.value)" value="#000000">
+            </div>
+            <div class="color-picker-wrapper" title="Highlight Color">
+                <span>Highlight</span>
+                <input type="color" onchange="formatDoc('hiliteColor', this.value)" value="#ffffff">
+            </div>
+        </div>
+
+        <!-- Alignment -->
+        <div class="tool-group">
+            <button onclick="formatDoc('justifyLeft')" title="Align Left">⬅</button>
+            <button onclick="formatDoc('justifyCenter')" title="Align Center">↔</button>
+            <button onclick="formatDoc('justifyRight')" title="Align Right">➡</button>
+            <button onclick="formatDoc('justifyFull')" title="Justify">≡</button>
+        </div>
+
+        <!-- Lists & Inserts -->
+        <div class="tool-group">
+            <button onclick="formatDoc('insertUnorderedList')" title="Bullet List">• List</button>
+            <button onclick="formatDoc('insertOrderedList')" title="Numbered List">1. List</button>
+            <button onclick="addLink()" title="Insert Link">🔗 Link</button>
+            <button onclick="formatDoc('insertHorizontalRule')" title="Horizontal Line">— Line</button>
+        </div>
+
+        <!-- Clear & Actions -->
+        <div class="tool-group">
+            <button onclick="formatDoc('removeFormat')" title="Clear Formatting">🧹 Clear</button>
+            <button onclick="window.print()" title="Print or Save to PDF">🖨️ Print / PDF</button>
+            <button onclick="downloadDoc()" title="Download as Word File">💾 Export .doc</button>
+        </div>
+    </div>
+
+    <!-- Paper Workspace -->
+    <div class="workspace">
+        <div id="editor" contenteditable="true" spellcheck="true">
+            <h1>Document Title</h1>
+            <p>Welcome to your web-based document editor! You can start typing directly into this document area.</p>
+            <p>Use the toolbar above to change formatting, apply headings, insert lists, change text colors, and export your work.</p>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div>
+            <span>Words: <strong id="word-count">0</strong></span> | 
+            <span>Characters: <strong id="char-count">0</strong></span>
+        </div>
+        <div>Page Layout: Letter / A4</div>
+    </div>
+
+    <!-- Embedded JavaScript Logic -->
+    <script>
+        const editor = document.getElementById('editor');
+        const wordCountEl = document.getElementById('word-count');
+        const charCountEl = document.getElementById('char-count');
+
+        // Execute Standard Rich Text Commands
+        function formatDoc(cmd, value = null) {
+            document.execCommand(cmd, false, value);
+            editor.focus();
+            updateStats();
+        }
+
+        // Insert Link Prompt
+        function addLink() {
+            const url = prompt('Enter the URL link:', 'https://');
+            if (url) {
+                formatDoc('createLink', url);
+            }
+        }
+
+        // Calculate Words and Character Counts
+        function updateStats() {
+            const text = editor.innerText || editor.textContent;
+            
+            // Character count
+            charCountEl.innerText = text.length;
+
+            // Word count logic
+            const trimmedText = text.trim();
+            if (trimmedText === '') {
+                wordCountEl.innerText = '0';
+            } else {
+                const words = trimmedText.split(/\s+/);
+                wordCountEl.innerText = words.length;
+            }
+        }
+
+        // Download document as an HTML-formatted Word file (.doc)
+        function downloadDoc() {
+            const content = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                      xmlns:w='urn:schemas-microsoft-com:office:word' 
+                      xmlns='http://www.w3.org/TR/REC-html40'>
+                <head><meta charset='utf-8'><title>Exported Document</title></head>
+                <body>${editor.innerHTML}</body>
+                </html>
+            `;
+
+            const blob = new Blob(['\ufeff', content], {
+                type: 'application/msword'
+            });
+
+            // Create download link element
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Document.doc';
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Event listeners for stats update
+        editor.addEventListener('input', updateStats);
+        editor.addEventListener('keyup', updateStats);
+
+        // Initial stat check on load
+        window.onload = updateStats;
+    </script>
+</body>
+</html>
