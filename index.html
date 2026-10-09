@@ -3,16 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Word Processor</title>
+    <title>Untitled Document — Slate</title>
     <style>
-        /* --- Root & Layout Styling --- */
+        /* --- Modern CSS Variables & Theme Setup --- */
         :root {
-            --primary-color: #2b579a; /* MS Word Blue */
-            --bg-color: #e6e6e6;
-            --toolbar-bg: #f3f3f3;
-            --border-color: #d1d1d1;
-            --button-hover: #d0e1f9;
-            --text-color: #333333;
+            --bg-main: #f8fafc;
+            --bg-surface: #ffffff;
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-light: #eeeffe;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0f172a;
+            --bg-surface: #1e293b;
+            --border-color: #334155;
+            --border-hover: #475569;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #818cf8;
+            --accent-hover: #6366f1;
+            --accent-light: #312e81;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
         }
 
         * {
@@ -22,349 +46,522 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        /* --- Header & Toolbar --- */
+        /* --- Top Header Navigation --- */
         header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 20px;
+            height: 56px;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 0 20px;
+            z-index: 10;
         }
 
-        header h1 {
-            font-size: 1.1rem;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .doc-title {
+            font-size: 14px;
             font-weight: 600;
-            letter-spacing: 0.5px;
+            color: var(--text-primary);
+            border: none;
+            background: transparent;
+            outline: none;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: background-color 0.15s;
+        }
+
+        .doc-title:hover, .doc-title:focus {
+            background-color: var(--bg-main);
+        }
+
+        .save-indicator {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .save-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #10b981;
+            border-radius: 50%;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* --- Buttons & Inputs --- */
+        .btn {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--bg-main);
+            border-color: var(--border-hover);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-icon {
+            padding: 6px;
+            border-radius: var(--radius-sm);
+        }
+
+        /* --- Floating Sticky Toolbar --- */
+        .toolbar-wrapper {
+            position: sticky;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            padding: 12px 0;
+            z-index: 5;
+            pointer-events: none;
         }
 
         .toolbar {
-            background-color: var(--toolbar-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 6px 12px;
+            pointer-events: auto;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 4px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            gap: 2px;
+            max-width: 90vw;
+            overflow-x: auto;
         }
 
         .tool-group {
             display: flex;
             align-items: center;
             gap: 2px;
-            border-right: 1px solid var(--border-color);
-            padding-right: 6px;
-            margin-right: 2px;
-        }
-
-        .tool-group:last-child {
-            border-right: none;
-        }
-
-        /* --- Toolbar Controls --- */
-        button, select, input[type="color"] {
-            background: transparent;
-            border: 1px solid transparent;
-            border-radius: 3px;
-            padding: 5px 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 30px;
-            color: var(--text-color);
-            transition: all 0.2s ease;
-        }
-
-        button:hover, select:hover {
-            background-color: var(--button-hover);
-            border-color: #a6c8e0;
-        }
-
-        button:active {
-            background-color: #b5d3ed;
-        }
-
-        select {
-            background-color: #ffffff;
-            border: 1px solid var(--border-color);
-            outline: none;
-        }
-
-        .color-picker-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.8rem;
             padding: 0 4px;
         }
 
-        input[type="color"] {
-            width: 26px;
-            height: 26px;
-            padding: 0;
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            overflow: hidden;
+        .divider {
+            width: 1px;
+            height: 18px;
+            background-color: var(--border-color);
+            margin: 0 4px;
         }
 
-        input[type="color"]::-webkit-color-swatch-wrapper {
-            padding: 0;
-        }
-
-        input[type="color"]::-webkit-color-swatch {
+        .tool-btn {
+            background: transparent;
             border: none;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
         }
 
-        /* --- Document Workspace --- */
+        .tool-btn:hover {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        .tool-btn.active {
+            background-color: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .tool-select {
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 13px;
+            padding: 0 8px;
+            border-radius: var(--radius-sm);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .tool-select:hover {
+            background-color: var(--bg-main);
+        }
+
+        .color-picker-wrapper {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        /* --- Document Workspace & Canvas --- */
         .workspace {
             flex: 1;
             overflow-y: auto;
-            padding: 30px 10px;
             display: flex;
             justify-content: center;
-            background-color: var(--bg-color);
+            padding: 20px 16px 60px 16px;
         }
 
-        /* Paper Style (Standard A4 ratio representation) */
+        .document-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            min-height: 900px;
+            padding: 60px 72px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .document-container:focus-within {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-hover);
+        }
+
+        /* Content Editable Styling */
         #editor {
-            background-color: #ffffff;
-            width: 816px; /* Standard Letter/A4 pixel width equivalent */
-            min-height: 1056px;
-            padding: 72px; /* 1 inch margin */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
             outline: none;
-            font-family: 'Arial', sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
-            color: #000000;
-            word-wrap: break-word;
+            min-height: 800px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-primary);
         }
 
-        #editor:focus {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        #editor h1 { font-size: 2em; font-weight: 700; margin-bottom: 0.5em; letter-spacing: -0.02em; }
+        #editor h2 { font-size: 1.5em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; letter-spacing: -0.01em; }
+        #editor h3 { font-size: 1.25em; font-weight: 600; margin-top: 1em; margin-bottom: 0.5em; }
+        #editor p { margin-bottom: 1em; }
+        #editor blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            margin: 1em 0;
+            color: var(--text-muted);
+            font-style: italic;
         }
+        #editor pre, #editor code {
+            background-color: var(--bg-main);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        #editor pre { padding: 12px; overflow-x: auto; margin: 1em 0; }
+        #editor ul, #editor ol { padding-left: 24px; margin-bottom: 1em; }
 
-        /* --- Status Bar --- */
-        .status-bar {
-            background-color: #f9f9f9;
+        /* --- Footer / Status Bar --- */
+        footer {
+            height: 36px;
+            background-color: var(--bg-surface);
             border-top: 1px solid var(--border-color);
-            padding: 4px 20px;
-            font-size: 0.8rem;
-            color: #666;
             display: flex;
+            align-items: center;
             justify-content: space-between;
+            padding: 0 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .status-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         /* --- Print Styles --- */
         @media print {
-            body {
-                background: white;
-            }
-            header, .toolbar, .status-bar {
-                display: none !important;
-            }
-            .workspace {
-                padding: 0;
-                overflow: visible;
-            }
-            #editor {
-                box-shadow: none;
-                width: 100%;
-                min-height: auto;
-                padding: 0;
-            }
+            header, .toolbar-wrapper, footer { display: none !important; }
+            body { background: white; }
+            .workspace { padding: 0; overflow: visible; }
+            .document-container { border: none; box-shadow: none; padding: 0; width: 100%; }
         }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
-    <!-- Header Title -->
+    <!-- Header Navigation -->
     <header>
-        <h1>Web Word Processor</h1>
-        <span style="font-size: 0.8rem; opacity: 0.8;">Single-File Rich Text Editor</span>
+        <div class="header-left">
+            <div class="brand-logo">S</div>
+            <input type="text" class="doc-title" id="doc-title" value="Project Proposal Draft">
+            <div class="save-indicator">
+                <span class="save-dot"></span>
+                <span id="save-status">Saved</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-icon" id="theme-toggle" title="Toggle Dark/Light Mode">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <button class="btn" onclick="window.print()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"></path></svg>
+                Export PDF
+            </button>
+            <button class="btn btn-primary" onclick="exportDoc()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+                Download
+            </button>
+        </div>
     </header>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-        <!-- History -->
-        <div class="tool-group">
-            <button onclick="formatDoc('undo')" title="Undo">↩ Undo</button>
-            <button onclick="formatDoc('redo')" title="Redo">↪ Redo</button>
-        </div>
-
-        <!-- Typography -->
-        <div class="tool-group">
-            <select onchange="formatDoc('fontName', this.value)" title="Font Family">
-                <option value="Arial" selected>Arial</option>
-                <option value="Calibri">Calibri</option>
-                <option value="Times New Roman">Times New Roman</option>
-                <option value="Courier New">Courier New</option>
-                <option value="Georgia">Georgia</option>
-                <option value="Verdana">Verdana</option>
-            </select>
-
-            <select onchange="formatDoc('fontSize', this.value)" title="Font Size">
-                <option value="1">Small</option>
-                <option value="3" selected>Normal</option>
-                <option value="4">Large</option>
-                <option value="5">Huge</option>
-                <option value="6">Maximum</option>
-            </select>
-
-            <select onchange="formatDoc('formatBlock', this.value)" title="Style Header">
-                <option value="P">Paragraph</option>
-                <option value="H1">Heading 1</option>
-                <option value="H2">Heading 2</option>
-                <option value="H3">Heading 3</option>
-            </select>
-        </div>
-
-        <!-- Inline Formatting -->
-        <div class="tool-group">
-            <button onclick="formatDoc('bold')" title="Bold"><b>B</b></button>
-            <button onclick="formatDoc('italic')" title="Italic"><i>I</i></button>
-            <button onclick="formatDoc('underline')" title="Underline"><u>U</u></button>
-            <button onclick="formatDoc('strikeThrough')" title="Strikethrough"><s>S</s></button>
-        </div>
-
-        <!-- Colors -->
-        <div class="tool-group">
-            <div class="color-picker-wrapper" title="Text Color">
-                <span>Text</span>
-                <input type="color" onchange="formatDoc('foreColor', this.value)" value="#000000">
+    <!-- Floating Sticky Toolbar -->
+    <div class="toolbar-wrapper">
+        <div class="toolbar">
+            <!-- Text Style -->
+            <div class="tool-group">
+                <select class="tool-select" onchange="format('formatBlock', this.value)">
+                    <option value="P">Paragraph</option>
+                    <option value="H1">Heading 1</option>
+                    <option value="H2">Heading 2</option>
+                    <option value="H3">Heading 3</option>
+                    <option value="BLOCKQUOTE">Quote</option>
+                    <option value="PRE">Code Block</option>
+                </select>
             </div>
-            <div class="color-picker-wrapper" title="Highlight Color">
-                <span>Highlight</span>
-                <input type="color" onchange="formatDoc('hiliteColor', this.value)" value="#ffffff">
+
+            <div class="divider"></div>
+
+            <!-- Inline Styles -->
+            <div class="tool-group">
+                <button class="tool-btn" onclick="format('bold')" title="Bold (Ctrl+B)">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>
+                </button>
+                <button class="tool-btn" onclick="format('italic')" title="Italic (Ctrl+I)">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"></line><line x1="14" y1="20" x2="5" y2="20"></line><line x1="15" y1="4" x2="9" y2="20"></line></svg>
+                </button>
+                <button class="tool-btn" onclick="format('underline')" title="Underline (Ctrl+U)">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg>
+                </button>
+                <button class="tool-btn" onclick="format('strikeThrough')" title="Strikethrough">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17.3 4.9A4 4 0 0 0 11.5 4M4 11.5h16M11.5 20a4 4 0 0 0 5.8-5.6"></path></svg>
+                </button>
             </div>
-        </div>
 
-        <!-- Alignment -->
-        <div class="tool-group">
-            <button onclick="formatDoc('justifyLeft')" title="Align Left">⬅</button>
-            <button onclick="formatDoc('justifyCenter')" title="Align Center">↔</button>
-            <button onclick="formatDoc('justifyRight')" title="Align Right">➡</button>
-            <button onclick="formatDoc('justifyFull')" title="Justify">≡</button>
-        </div>
+            <div class="divider"></div>
 
-        <!-- Lists & Inserts -->
-        <div class="tool-group">
-            <button onclick="formatDoc('insertUnorderedList')" title="Bullet List">• List</button>
-            <button onclick="formatDoc('insertOrderedList')" title="Numbered List">1. List</button>
-            <button onclick="addLink()" title="Insert Link">🔗 Link</button>
-            <button onclick="formatDoc('insertHorizontalRule')" title="Horizontal Line">— Line</button>
-        </div>
+            <!-- Color Options -->
+            <div class="tool-group">
+                <div class="tool-btn color-picker-wrapper" title="Text Color">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path></svg>
+                    <input type="color" onchange="format('foreColor', this.value)" value="#0f172a">
+                </div>
+                <div class="tool-btn color-picker-wrapper" title="Highlight Color">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l-6 6v3h3l6-6m-3-3l3-3 6 6-3 3m-6-6l6 6"></path></svg>
+                    <input type="color" onchange="format('hiliteColor', this.value)" value="#fef08a">
+                </div>
+            </div>
 
-        <!-- Clear & Actions -->
-        <div class="tool-group">
-            <button onclick="formatDoc('removeFormat')" title="Clear Formatting">🧹 Clear</button>
-            <button onclick="window.print()" title="Print or Save to PDF">🖨️ Print / PDF</button>
-            <button onclick="downloadDoc()" title="Download as Word File">💾 Export .doc</button>
+            <div class="divider"></div>
+
+            <!-- Alignment -->
+            <div class="tool-group">
+                <button class="tool-btn" onclick="format('justifyLeft')" title="Align Left">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
+                </button>
+                <button class="tool-btn" onclick="format('justifyCenter')" title="Align Center">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="10" x2="6" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="18" y1="18" x2="6" y2="18"></line></svg>
+                </button>
+                <button class="tool-btn" onclick="format('justifyRight')" title="Align Right">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="21" y1="10" x2="7" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Lists & Utilities -->
+            <div class="tool-group">
+                <button class="tool-btn" onclick="format('insertUnorderedList')" title="Bullet List">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                </button>
+                <button class="tool-btn" onclick="format('insertOrderedList')" title="Numbered List">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></svg>
+                </button>
+                <button class="tool-btn" onclick="addLink()" title="Insert Link">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                </button>
+                <button class="tool-btn" onclick="format('removeFormat')" title="Clear Formatting">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 14l-5-5m0 0l-5 5m5-5v12"></path><path d="M4 4h16"></path></svg>
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Paper Workspace -->
+    <!-- Workspace -->
     <div class="workspace">
-        <div id="editor" contenteditable="true" spellcheck="true">
-            <h1>Document Title</h1>
-            <p>Welcome to your web-based document editor! You can start typing directly into this document area.</p>
-            <p>Use the toolbar above to change formatting, apply headings, insert lists, change text colors, and export your work.</p>
+        <div class="document-container">
+            <div id="editor" contenteditable="true" spellcheck="true">
+                <h1>Welcome to Slate</h1>
+                <p>This is a modern, distraction-free document editor built for clarity and speed.</p>
+                <h2>Key Highlights</h2>
+                <ul>
+                    <li>Floating toolbar that stays accessible while scrolling</li>
+                    <li>Automatic local saving so you never lose your progress</li>
+                    <li>Clean dark & light modes tailored for reading comfort</li>
+                </ul>
+                <blockquote>"Simplicity is about subtracting the obvious and adding the meaningful."</blockquote>
+            </div>
         </div>
     </div>
 
     <!-- Status Bar -->
-    <div class="status-bar">
-        <div>
-            <span>Words: <strong id="word-count">0</strong></span> | 
-            <span>Characters: <strong id="char-count">0</strong></span>
+    <footer>
+        <div class="status-stats">
+            <span><strong id="word-count">0</strong> words</span>
+            <span><strong id="char-count">0</strong> characters</span>
+            <span><strong id="read-time">0</strong> min read</span>
         </div>
-        <div>Page Layout: Letter / A4</div>
-    </div>
+        <div>UTF-8 Standard</div>
+    </footer>
 
-    <!-- Embedded JavaScript Logic -->
+    <!-- Logic -->
     <script>
         const editor = document.getElementById('editor');
-        const wordCountEl = document.getElementById('word-count');
-        const charCountEl = document.getElementById('char-count');
+        const docTitle = document.getElementById('doc-title');
+        const saveStatus = document.getElementById('save-status');
+        const themeToggle = document.getElementById('theme-toggle');
 
-        // Execute Standard Rich Text Commands
-        function formatDoc(cmd, value = null) {
+        // Apply formatting
+        function format(cmd, value = null) {
             document.execCommand(cmd, false, value);
             editor.focus();
             updateStats();
+            triggerAutoSave();
         }
 
-        // Insert Link Prompt
+        // Insert Link
         function addLink() {
-            const url = prompt('Enter the URL link:', 'https://');
-            if (url) {
-                formatDoc('createLink', url);
-            }
+            const url = prompt('Enter URL:', 'https://');
+            if (url) format('createLink', url);
         }
 
-        // Calculate Words and Character Counts
+        // Stats calculation
         function updateStats() {
-            const text = editor.innerText || editor.textContent;
-            
-            // Character count
-            charCountEl.innerText = text.length;
+            const text = editor.innerText || '';
+            const trimmed = text.trim();
+            const words = trimmed ? trimmed.split(/\s+/).length : 0;
+            const chars = text.length;
+            const readTime = Math.ceil(words / 200);
 
-            // Word count logic
-            const trimmedText = text.trim();
-            if (trimmedText === '') {
-                wordCountEl.innerText = '0';
-            } else {
-                const words = trimmedText.split(/\s+/);
-                wordCountEl.innerText = words.length;
-            }
+            document.getElementById('word-count').innerText = words;
+            document.getElementById('char-count').innerText = chars;
+            document.getElementById('read-time').innerText = readTime;
         }
 
-        // Download document as an HTML-formatted Word file (.doc)
-        function downloadDoc() {
-            const content = `
-                <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-                      xmlns:w='urn:schemas-microsoft-com:office:word' 
-                      xmlns='http://www.w3.org/TR/REC-html40'>
-                <head><meta charset='utf-8'><title>Exported Document</title></head>
+        // Auto Save System
+        let saveTimeout;
+        function triggerAutoSave() {
+            saveStatus.innerText = 'Saving...';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                localStorage.setItem('slate_doc_content', editor.innerHTML);
+                localStorage.setItem('slate_doc_title', docTitle.value);
+                saveStatus.innerText = 'Saved';
+            }, 800);
+        }
+
+        // Theme Toggle Logic
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            themeToggle.innerHTML = newTheme === 'dark' 
+                ? '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
+                : '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+        });
+
+        // Document Export
+        function exportDoc() {
+            const title = docTitle.value || 'Document';
+            const blob = new Blob([`
+                <!DOCTYPE html>
+                <html>
+                <head><title>${title}</title><style>body{font-family:sans-serif;line-height:1.6;padding:40px;max-width:800px;margin:auto;}</style></head>
                 <body>${editor.innerHTML}</body>
                 </html>
-            `;
+            `], { type: 'text/html' });
 
-            const blob = new Blob(['\ufeff', content], {
-                type: 'application/msword'
-            });
-
-            // Create download link element
-            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = 'Document.doc';
-            
-            document.body.appendChild(a);
+            a.href = URL.createObjectURL(blob);
+            a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.html`;
             a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
-        // Event listeners for stats update
-        editor.addEventListener('input', updateStats);
-        editor.addEventListener('keyup', updateStats);
+        // Listeners
+        editor.addEventListener('input', () => { updateStats(); triggerAutoSave(); });
+        docTitle.addEventListener('input', triggerAutoSave);
 
-        // Initial stat check on load
-        window.onload = updateStats;
+        // Load saved state
+        window.onload = () => {
+            const savedContent = localStorage.getItem('slate_doc_content');
+            const savedTitle = localStorage.getItem('slate_doc_title');
+            if (savedContent) editor.innerHTML = savedContent;
+            if (savedTitle) docTitle.value = savedTitle;
+            updateStats();
+        };
     </script>
 </body>
 </html>
