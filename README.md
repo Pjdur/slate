@@ -1,4 +1,5 @@
 # Slate
+https://pjdur.github.io/slate
 
 Slate is a modern, distraction-free document editor, contained in one HTML file.
 
